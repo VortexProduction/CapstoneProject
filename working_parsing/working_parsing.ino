@@ -1,54 +1,67 @@
-// include the library code:
-#include <LiquidCrystal.h>
-#include <Wire.h>
+// Test code for Adafruit GPS modules using MTK3329/MTK3339 driver
+//
+// This code shows how to listen to the GPS module in an interrupt
+// which allows the program to have more 'freedom' - just parse
+// when a new NMEA sentence is available! Then access data when
+// desired.
+//
+// Tested and works great with the Adafruit Ultimate GPS module
+// using MTK33x9 chipset
+//    ------> http://www.adafruit.com/products/746
+// Pick one up today at the Adafruit electronics shop 
+// and help support open source hardware & software! -ada
+
 #include <Adafruit_GPS.h>
 #include <SoftwareSerial.h>
+#include <Wire.h>
+#include <LiquidCrystal.h>
+// If you're using a GPS module:
+// Connect the GPS Power pin to 5V
+// Connect the GPS Ground pin to ground
+// If using software serial (sketch example default):
+//   Connect the GPS TX (transmit) pin to Digital 3
+//   Connect the GPS RX (receive) pin to Digital 2
+// If using hardware serial (e.g. Arduino Mega):
+//   Connect the GPS TX (transmit) pin to Arduino RX1, RX2 or RX3
+//   Connect the GPS RX (receive) pin to matching TX1, TX2 or TX3
 
+// If you're using the Adafruit GPS shield, change 
+// SoftwareSerial mySerial(3, 2); -> SoftwareSerial mySerial(8, 7);
+// and make sure the switch is set to SoftSerial
 
+// If using software serial, keep this line enabled
+// (you can change the pin numbers to match your wiring):
 SoftwareSerial mySerial(3, 2);
-LiquidCrystal lcd(7, 8, 9, 12, 4, 13);
+LiquidCrystal lcd(7,8,9,12,4,13);
+
+// If using hardware serial (e.g. Arduino Mega), comment out the
+// above SoftwareSerial line, and enable this line instead
+// (you can change the Serial number to match your wiring):
+
+//HardwareSerial mySerial = Serial1;
 
 
 Adafruit_GPS GPS(&mySerial);
 
 
+// Set GPSECHO to 'false' to turn off echoing the GPS data to the Serial console
+// Set to 'true' if you want to debug and listen to the raw GPS sentences. 
 #define GPSECHO  true
-uint32_t timer = millis();
 
-#define BLUELITE 11
- 
-// initialize the library with the numbers of the interface pins
-
- 
-// you can change the overall brightness by range 0 -> 255
-int brightness = 255;
-int counter = 0;
-int counter2 = 0;
- 
-
+// this keeps track of whether we're using the interrupt
+// off by default!
 boolean usingInterrupt = false;
 void useInterrupt(boolean); // Func prototype keeps Arduino 0023 happy
 
-void setup() {
-  // set up the LCD's number of rows and columns: 
-  lcd.begin(16, 2);
-  // Print a message to the LCD.
-  
-  
-  pinMode(BLUELITE, OUTPUT);
-  pinMode(10,OUTPUT);    //Yellow
-  pinMode(3,OUTPUT);     //Red
-  pinMode(6,OUTPUT);     //Green
-  pinMode(5,OUTPUT);     //Blue
-
-  brightness = 100;
-  
-      
+void setup()  
+{
+    
   // connect at 115200 so we can read the GPS fast enough and echo without dropping chars
   // also spit it out
   Serial.begin(115200);
   Serial.println("Adafruit GPS library basic test!");
-
+  lcd.begin(16,2);
+  pinMode(11,OUTPUT);
   // 9600 NMEA is the default baud rate for Adafruit MTK GPS's- some use 4800
   GPS.begin(9600);
   
@@ -76,7 +89,8 @@ void setup() {
   // Ask for firmware version
   mySerial.println(PMTK_Q_RELEASE);
 }
- 
+
+
 // Interrupt is called once a millisecond, looks for any new GPS data, and stores it
 SIGNAL(TIMER0_COMPA_vect) {
   char c = GPS.read();
@@ -103,23 +117,21 @@ void useInterrupt(boolean v) {
   }
 }
 
-
+void setBacklight(uint8_t b) {
+  // normalize the red LED - its brighter than the rest!
  
-void loop() {
-  
-  setBacklight(255, 0, 255);
-  
-  analogWrite(6,counter2);
-  counter+= 10;
-  counter2+= 20;
-  if(counter == 250)
-  {
-    counter = 0;
-  } 
-  if(counter2 >= 127)
-  {
-    counter2 = 50;
-  } 
+
+  b = map(b, 0, 255, 0, 100);
+ 
+  // common anode so invert!
+  b = map(b, 0, 255, 255, 0);
+  analogWrite(11, b);
+}
+
+uint32_t timer = millis();
+void loop()                     // run over and over again
+{
+  setBacklight(255);
   // in case you are not using the interrupt above, you'll
   // need to 'hand query' the GPS, not suggested :(
   if (! usingInterrupt) {
@@ -148,43 +160,19 @@ void loop() {
   if (millis() - timer > 2000) { 
     timer = millis(); // reset the timer
     
-    
-    
-      //Serial.print("Location: ");
-      //Serial.print(GPS.latitude, 4); Serial.print(GPS.lat);
-      //Serial.print(", "); 
-      //Serial.print(GPS.longitude, 4); Serial.println(GPS.lon);
-      Serial.print("Location (in degrees, works with Google Maps): ");
-      Serial.print(GPS.latitudeDegrees, 4);
-      Serial.print(", "); 
-      Serial.println(GPS.longitudeDegrees, 4);
+    if (GPS.fix) {
       
-      lcd.setCursor(0,0);
-      lcd.print("Speed (km/h):");
-      lcd.setCursor(0,1);
-      lcd.print(GPS.speed);
-      lcd.setCursor(6,1);
-      lcd.print((int)GPS.satellites);
-      Serial.print("Speed: ");Serial.println((double)GPS.speed * 1.8520);
+      Serial.print("Speed (km/h): "); Serial.println(GPS.speed * 1.852);
       Serial.print("Angle: "); Serial.println(GPS.angle);
       Serial.print("Altitude: "); Serial.println(GPS.altitude);
       Serial.print("Satellites: "); Serial.println((int)GPS.satellites);
-    
+      lcd.setCursor(0,0);
+      lcd.print("Speed (km/h):");
+      lcd.setCursor(0,1);
+      lcd.print(GPS.speed * 1.852);
+      lcd.setCursor(6,1);
+      lcd.print((int)GPS.satellites);
+      
+    }
   }
 }
-
- 
- 
-void setBacklight(uint8_t r, uint8_t g, uint8_t b) {
-  // normalize the red LED - its brighter than the rest!
- 
-
-  b = map(b, 0, 255, 0, brightness);
- 
-  // common anode so invert!
-  b = map(b, 0, 255, 255, 0);
-  analogWrite(BLUELITE, b);
-}
-
-
-
