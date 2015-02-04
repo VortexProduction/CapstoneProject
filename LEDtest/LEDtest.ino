@@ -19,25 +19,6 @@ void setup() {
 
 void loop(){
   strip.setBrightness(150);
- for(int n=0;n<12;n++)
-{
- strip.setPixelColor(n,255,0,0);
- strip.show();
- delay(20);
- strip.setPixelColor(n,0,0,0);
-} 
- for(int n=0;n<12;n++)
-{
- strip.setPixelColor(n,0,255,0);
- strip.show();
- delay(20);
- strip.setPixelColor(n,0,0,0);
-} 
- for(int n=0;n<12;n++)
-{
- strip.setPixelColor(n,0,0,255);
- strip.show();
- delay(20);
- strip.setPixelColor(n,0,0,0);
-} 
+  strip.setPixelColor(1,255,0,0);
+  strip.show();
 }

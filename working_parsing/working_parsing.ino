@@ -15,6 +15,8 @@
 #include <SoftwareSerial.h>
 #include <Wire.h>
 #include <LiquidCrystal.h>
+#include <Adafruit_NeoPixel.h>
+#include <avr/power.h>
 // If you're using a GPS module:
 // Connect the GPS Power pin to 5V
 // Connect the GPS Ground pin to ground
@@ -33,7 +35,7 @@
 // (you can change the pin numbers to match your wiring):
 SoftwareSerial mySerial(3, 2);
 LiquidCrystal lcd(7,8,9,12,4,13);
-
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(60, 6, NEO_GRB + NEO_KHZ800);
 // If using hardware serial (e.g. Arduino Mega), comment out the
 // above SoftwareSerial line, and enable this line instead
 // (you can change the Serial number to match your wiring):
@@ -55,7 +57,9 @@ void useInterrupt(boolean); // Func prototype keeps Arduino 0023 happy
 
 void setup()  
 {
-    
+  //LEd strip initialization
+  strip.begin();
+  strip.show();  
   // connect at 115200 so we can read the GPS fast enough and echo without dropping chars
   // also spit it out
   Serial.begin(115200);
@@ -66,9 +70,9 @@ void setup()
   GPS.begin(9600);
   
   // uncomment this line to turn on RMC (recommended minimum) and GGA (fix data) including altitude
-  GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA);
+  //GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMC);
   // uncomment this line to turn on only the "minimum recommended" data
-  //GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCONLY);
+  GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCONLY);
   // For parsing data, we don't suggest using anything but either RMC only or RMC+GGA since
   // the parser doesn't care about other sentences at this time
   
@@ -129,9 +133,13 @@ void setBacklight(uint8_t b) {
 }
 
 uint32_t timer = millis();
+int counter = 0;
+
+
 void loop()                     // run over and over again
 {
   setBacklight(255);
+  strip.setBrightness(64);
   // in case you are not using the interrupt above, you'll
   // need to 'hand query' the GPS, not suggested :(
   if (! usingInterrupt) {
@@ -157,22 +165,78 @@ void loop()                     // run over and over again
   if (timer > millis())  timer = millis();
 
   // approximately every 2 seconds or so, print out the current stats
-  if (millis() - timer > 2000) { 
+  if (millis() - timer > 200) { 
     timer = millis(); // reset the timer
+    
+      
+      
     
     if (GPS.fix) {
       
-      Serial.print("Speed (km/h): "); Serial.println(GPS.speed * 1.852);
-      Serial.print("Angle: "); Serial.println(GPS.angle);
-      Serial.print("Altitude: "); Serial.println(GPS.altitude);
-      Serial.print("Satellites: "); Serial.println((int)GPS.satellites);
+      //Serial.print("Speed (km/h): "); Serial.println(GPS.speed * 1.852);
+      //Serial.print("Angle: "); Serial.println(GPS.angle);
+      //Serial.print("Altitude: "); Serial.println(GPS.altitude);
+      //Serial.print("Satellites: "); Serial.println((int)GPS.satellites);
       lcd.setCursor(0,0);
       lcd.print("Speed (km/h):");
       lcd.setCursor(0,1);
       lcd.print(GPS.speed * 1.852);
       lcd.setCursor(6,1);
       lcd.print((int)GPS.satellites);
+      lcd.setCursor(12,1);
+      lcd.print(GPS.angle);
+      if(GPS.angle > 315 && GPS.angle < 45)
+      {
+         ClearLEDS();
+         strip.setPixelColor(1,255,0,255);
+         strip.show(); 
+      }
+      if(GPS.angle > 45 && GPS.angle < 135)
+      {
+         ClearLEDS();
+         strip.setPixelColor(4,255,0,255);
+         strip.show(); 
+      }
+      if(GPS.angle > 135 && GPS.angle < 225)
+      {
+         ClearLEDS();
+         strip.setPixelColor(7,255,0,255);
+         strip.show(); 
+      }
+      if(GPS.angle > 225 && GPS.angle < 315)
+      {
+         ClearLEDS();
+         strip.setPixelColor(10,255,0,255);
+         strip.show(); 
+      }
       
     }
+    else
+    {
+      lcd.clear();
+      for(int i = 0; i < 12; i++)
+      {
+      
+      lcd.setCursor(0,0);
+      lcd.print("Searching");
+        strip.setPixelColor(i,255,0,255);
+        strip.show();
+        delay(200);
+        strip.setPixelColor(i,0,0,0);
+      }
+        
+    }
+
+       
+    
   }
+}
+
+void ClearLEDS()
+{
+  for(int i = 0; i < 12; i++)
+      {
+        strip.setPixelColor(i,0,0,0);
+        strip.show();
+      }
 }
