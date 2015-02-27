@@ -221,7 +221,7 @@ void loop()                     // run over and over again
       lcd.print("Searching");
         strip.setPixelColor(i,255,0,255);
         strip.show();
-        delay(200);
+        delay(75);
         strip.setPixelColor(i,0,0,0);
       }
         

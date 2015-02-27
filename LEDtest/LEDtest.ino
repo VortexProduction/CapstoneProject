@@ -2,7 +2,9 @@
 #include <avr/power.h>
 
 #define PIN 6
-
+int blue = 0;
+int green = 0;
+int red = 0;
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(60, PIN, NEO_GRB + NEO_KHZ800);
 
 void setup() {
@@ -18,7 +20,13 @@ void setup() {
 }
 
 void loop(){
-  strip.setBrightness(150);
-  strip.setPixelColor(1,255,0,0);
-  strip.show();
+  strip.setBrightness(250);
+  green = random(0,255);
+  red = random(0,255);
+  blue = random(0,255);
+  int i = random(0,12);
+    strip.setPixelColor(i,red,green,blue);
+    strip.show();
+    strip.setPixelColor(i,0,0,0);
+  
 }
