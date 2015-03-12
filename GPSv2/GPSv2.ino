@@ -28,7 +28,7 @@ Adafruit_NeoPixel strip = Adafruit_NeoPixel(60, 6, NEO_GRB + NEO_KHZ800);
 #define North_LNG 104.0
 
 TinyGPSPlus gps;
-static const uint32_t GPSBaud = 4800;
+static const uint32_t GPSBaud = 9600;
 
 void setup()  
 {
@@ -66,7 +66,9 @@ void loop()                     // run over and over again
   while (ss.available() > 0)
   {
     if (gps.encode(ss.read()))
+    {
       displayInfo();
+    }
     else
     {
       lcd.clear();
