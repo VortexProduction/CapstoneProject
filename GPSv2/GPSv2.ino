@@ -29,6 +29,20 @@ Adafruit_NeoPixel strip = Adafruit_NeoPixel(60, 6, NEO_GRB + NEO_KHZ800);
 
 TinyGPSPlus gps;
 static const uint32_t GPSBaud = 9600;
+<<<<<<< Updated upstream
+=======
+
+static void smartDelay(unsigned long ms)
+{
+  unsigned long start = millis();
+  do 
+  {
+    while (ss.available())
+      gps.encode(ss.read());
+  } while (millis() - start < ms);
+}
+
+>>>>>>> Stashed changes
 
 void setup()  
 {
@@ -64,6 +78,7 @@ void loop()                     // run over and over again
 {
   
   while (ss.available() > 0)
+<<<<<<< Updated upstream
   {
     if (gps.encode(ss.read()))
     {
@@ -94,24 +109,35 @@ void loop()                     // run over and over again
          strip.show(); 
       }
       if(GPS.angle > 45 && GPS.angle < 135)
+=======
+  {    
+      if(gps.encode(ss.read()))
+>>>>>>> Stashed changes
       {
-         ClearLEDS();
-         strip.setPixelColor(4,255,0,255);
-         strip.show(); 
+        Serial.println(F("test2"));
+        displayInfo();
       }
-      if(GPS.angle > 135 && GPS.angle < 225)
+      else
       {
-         ClearLEDS();
-         strip.setPixelColor(7,255,0,255);
-         strip.show(); 
+        /*lcd.clear();
+        for(int i = 0; i < 12; i++)
+        {
+        
+        lcd.setCursor(0,0);
+        lcd.print("Searching");
+          strip.setPixelColor(i,255,0,255);
+          strip.show();
+          //delay(75);
+          smartDelay(0);
+          strip.setPixelColor(i,0,0,0);
+        } 
+       //smartDelay(0); */
       }
-      if(GPS.angle > 225 && GPS.angle < 315)
-      {
-         ClearLEDS();
-         strip.setPixelColor(10,255,0,255);
-         strip.show(); 
-      }
-     */ 
+    if (millis() > 5000 && gps.charsProcessed() < 10)
+    {
+      Serial.println(F("No GPS detected: check wiring."));
+    }
+
     
   }
         
@@ -134,23 +160,30 @@ void displayInfo()
 {
   
   double courseToDestination = TinyGPSPlus::courseTo(
-      gps.location.lat(), gps.location.lng(), North_LAT, North_LNG);
+  gps.location.lat(), gps.location.lng(), North_LAT, North_LNG);
   const char *directionToDestination = TinyGPSPlus::cardinal(courseToDestination);
   int courseChangeNeeded = (int)(360 + courseToDestination - gps.course.deg()) % 360;
   
   if(gps.speed.isValid())
   {
-     ss.print(gps.speed.kmph());
+     //lcd.clear();
+     //ss.print(gps.speed.kmph());
      lcd.setCursor(0,0);
      lcd.print("Speed (km/h):");
      lcd.setCursor(0,1);
+     //lcd.print(69);
      lcd.print(gps.speed.kmph());
-     lcd.setCursor(6,1);
-     //lcd.print((int)GPS.satellites);
+     
+     //lcd.setCursor(6,1);
+     //lcd.print(gps.satellites);
      lcd.setCursor(12,1);
      lcd.print(courseChangeNeeded);
+     //Serial.println(gps.location.lat());
+     //Serial.println(gps.location.lng());
+     //Serial.println(courseChangeNeeded);
+     
   }
-  
+  smartDelay(0);
   if (courseChangeNeeded >= 345 || courseChangeNeeded < 15)      
       {
          ClearLEDS();
@@ -223,4 +256,5 @@ void displayInfo()
          strip.setPixelColor(0,255,0,255);
          strip.show(); 
       }
+      
 }

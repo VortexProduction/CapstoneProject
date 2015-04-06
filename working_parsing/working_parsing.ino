@@ -185,28 +185,79 @@ void loop()                     // run over and over again
       lcd.print((int)GPS.satellites);
       lcd.setCursor(12,1);
       lcd.print(GPS.angle);
-      if(GPS.angle > 315 && GPS.angle < 45)
+      
+      int courseChangeNeeded = GPS.angle + 90;
+      
+      if (courseChangeNeeded >= 345 || courseChangeNeeded < 15)      
       {
          ClearLEDS();
          strip.setPixelColor(1,255,0,255);
          strip.show(); 
       }
-      if(GPS.angle > 45 && GPS.angle < 135)
+    else if (courseChangeNeeded >= 15 && courseChangeNeeded < 45)       
+      {
+         ClearLEDS();
+         strip.setPixelColor(2,255,0,255);
+         strip.show(); 
+      }     
+    else if (courseChangeNeeded >= 45 && courseChangeNeeded < 75)       
+      {
+         ClearLEDS();
+         strip.setPixelColor(3,255,0,255);
+         strip.show(); 
+      }
+    else if (courseChangeNeeded >= 75 && courseChangeNeeded < 105)       
       {
          ClearLEDS();
          strip.setPixelColor(4,255,0,255);
          strip.show(); 
+      }     
+    else if (courseChangeNeeded >= 105 && courseChangeNeeded < 135)
+      {
+         ClearLEDS();
+         strip.setPixelColor(5,255,0,255);
+         strip.show(); 
       }
-      if(GPS.angle > 135 && GPS.angle < 225)
+    else if (courseChangeNeeded >= 135 && courseChangeNeeded < 165)
+      {
+         ClearLEDS();
+         strip.setPixelColor(6,255,0,255);
+         strip.show(); 
+      }
+    else if (courseChangeNeeded >= 165 && courseChangeNeeded < 195)
       {
          ClearLEDS();
          strip.setPixelColor(7,255,0,255);
          strip.show(); 
       }
-      if(GPS.angle > 225 && GPS.angle < 315)
+    else if (courseChangeNeeded >= 195 && courseChangeNeeded < 225)
+      {
+         ClearLEDS();
+         strip.setPixelColor(8,255,0,255);
+         strip.show(); 
+      }
+    else if (courseChangeNeeded >= 225 && courseChangeNeeded < 255)
+      {
+         ClearLEDS();
+         strip.setPixelColor(9,255,0,255);
+         strip.show(); 
+      }
+    else if (courseChangeNeeded >= 255 && courseChangeNeeded < 285)
       {
          ClearLEDS();
          strip.setPixelColor(10,255,0,255);
+         strip.show(); 
+      }
+    else if (courseChangeNeeded >= 285 && courseChangeNeeded < 315)
+      {
+         ClearLEDS();
+         strip.setPixelColor(11,255,0,255);
+         strip.show(); 
+      }
+    else if (courseChangeNeeded >= 315 && courseChangeNeeded < 345)
+      {
+         ClearLEDS();
+         strip.setPixelColor(0,255,0,255);
          strip.show(); 
       }
       
